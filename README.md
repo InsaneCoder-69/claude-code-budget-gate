@@ -29,3 +29,6 @@ Vatsal Trivedi (CampusCollab) — non-engineer founder, built and tested end-to-
 
 ## License
 MIT
+
+## Windows
+Works on Windows with two small changes. See [WINDOWS.md](WINDOWS.md).
