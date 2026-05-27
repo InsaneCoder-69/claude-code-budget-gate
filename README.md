@@ -55,3 +55,10 @@ Vatsal Trivedi — non-engineer founder of CampusCollab. Designed, tested, and s
 
 ## License
 MIT — fork it, use it, improve it.
+
+## v1.1 — hardened after code review
+Shortly after release the code got an independent review that surfaced four real issues. All four are now fixed and covered by a 17-check test suite:
+1. `load()` could crash on a corrupted/missing `window_start` — now coerced safely.
+2. Gate, reconcile, and ledger could resolve **different** paths when `CLAUDE_PROJECT_DIR` was unset — all three now anchor to the same project root via the file's own location.
+3. Concurrent ledger writes could lose updates or corrupt the JSON — now atomic writes (temp + replace) plus a cross-platform file lock.
+4. A window reset re-read whole transcripts and counted old tokens into the new window — offsets are now preserved across resets, so only new usage is counted.

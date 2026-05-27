@@ -1,14 +1,17 @@
-#!/usr/bin/env python3
 import sys
 import os
 import json
 
-sys.path.insert(0, os.environ.get("CLAUDE_PROJECT_DIR", "."))
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if not os.environ.get("CLAUDE_PROJECT_DIR"):
+    os.environ["CLAUDE_PROJECT_DIR"] = _PROJECT_ROOT
+sys.path.insert(0, _PROJECT_ROOT)
 
 try:
     from budget import BudgetLedger
 except Exception:
     sys.exit(0)
+
 
 def extract_usage(line):
     try:
@@ -32,6 +35,7 @@ def extract_usage(line):
         + int(usage.get("cache_read_input_tokens", 0) or 0)
     )
 
+
 def main():
     try:
         event = json.load(sys.stdin)
@@ -43,25 +47,12 @@ def main():
         sys.exit(0)
 
     try:
-        led = BudgetLedger.load()
-        start = int(led.offsets.get(path, 0))
-        size = os.path.getsize(path)
-        if size < start:
-            start = 0
-        with open(path, "rb") as f:
-            f.seek(start)
-            chunk = f.read()
-        end = start + len(chunk)
-        counted = 0
-        for line in chunk.decode("utf-8", errors="ignore").splitlines():
-            counted += extract_usage(line)
-        led.tokens_spent += counted
-        led.offsets[path] = end
-        led.save()
+        BudgetLedger.reconcile_transcript(path, extract_usage)
     except Exception:
         sys.exit(0)
 
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
